@@ -1,0 +1,28 @@
+name: heroicons_animated
+description: Beautifully animated Heroicons for Flutter.
+version: 0.1.0
+homepage: https://github.com/heroicons-animated/heroicons-animated-flutter
+repository: https://github.com/heroicons-animated/heroicons-animated-flutter
+issue_tracker: https://github.com/heroicons-animated/heroicons-animated-flutter/issues
+topics:
+  - icons
+  - animation
+  - heroicons
+  - flutter
+
+environment:
+  sdk: ^3.7.0
+  flutter: ">=3.29.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  path_parsing: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^7.0.0
+
+flutter:
+  uses-material-design: true

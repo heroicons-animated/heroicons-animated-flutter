@@ -1,0 +1,23 @@
+name: heroicons_animated_docs
+description: Heroicons Animated Flutter docs website.
+publish_to: none
+version: 1.0.0
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.2.1
+  heroicons_animated:
+    path: ../
+  url_launcher: ^6.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^7.0.0
+
+flutter:
+  uses-material-design: true
