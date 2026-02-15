@@ -22,7 +22,7 @@ class IconCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1A1A1A) : Colors.grey.shade50,
+        color: isDark ? Colors.black : Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isDark ? Colors.white12 : Colors.grey.shade200,

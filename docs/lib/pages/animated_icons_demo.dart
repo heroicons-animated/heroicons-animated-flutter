@@ -87,7 +87,7 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF111111) : Colors.white,
+      backgroundColor: isDark ? const Color(0xFF141414) : const Color(0xFFF5F5F5),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(child: _buildNavbar(isDark)),
@@ -128,7 +128,7 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
 
   Widget _buildNavbar(bool isDark) {
     return Container(
-      color: isDark ? const Color(0xFF111111) : Colors.white,
+      color: isDark ? const Color(0xFF141414) : const Color(0xFFF5F5F5),
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
       child: Row(
         children: [
@@ -204,7 +204,7 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1A1A1A) : Colors.grey.shade50,
+              color: isDark ? Colors.black : Colors.white,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isDark ? Colors.white12 : Colors.grey.shade200,
@@ -248,7 +248,7 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1A1A1A) : Colors.grey.shade50,
+        color: isDark ? Colors.black : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isDark ? Colors.white12 : Colors.grey.shade200,
@@ -355,23 +355,25 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
     return InkWell(
       onTap: () => _launchUrl(url),
       borderRadius: BorderRadius.circular(6),
-      child: IntrinsicWidth(
-        child: Container(
-          constraints: const BoxConstraints(minHeight: _buttonHeight),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1A1A1A) : Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: isDark ? Colors.white24 : Colors.grey),
-          ),
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: isDark ? Colors.white : Colors.black,
-            ),
+      child: Container(
+        height: _buttonHeight,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isDark ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: isDark ? Colors.white24 : Colors.grey),
+        ),
+        child: Text(
+          text,
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.visible,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            color: isDark ? Colors.white : Colors.black,
           ),
         ),
       ),
@@ -392,7 +394,7 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1A1A1A) : Colors.grey.shade50,
+          color: isDark ? Colors.black : Colors.white,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(color: isDark ? Colors.white24 : Colors.grey),
         ),
@@ -422,10 +424,10 @@ class _StickySearchDelegate extends SliverPersistentHeaderDelegate {
     final isSticky = shrinkOffset > 0;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      color: isDark ? const Color(0xFF111111) : Colors.white,
+      color: isDark ? const Color(0xFF141414) : const Color(0xFFF5F5F5),
       child: Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF111111) : Colors.white,
+          color: isDark ? const Color(0xFF141414) : const Color(0xFFF5F5F5),
           boxShadow: isSticky
               ? [
                   BoxShadow(
