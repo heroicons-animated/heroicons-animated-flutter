@@ -5,7 +5,8 @@
 /// rotation, scale, translate, and opacity effects.
 library heroicons_animated;
 
-export 'src/icons/icons.dart';
+export 'src/icons/all_heroicons.dart';
+export 'src/icons/all_icons.dart';
 export 'src/models/animation.dart';
 export 'src/models/element.dart';
 export 'src/models/icon_data.dart';
