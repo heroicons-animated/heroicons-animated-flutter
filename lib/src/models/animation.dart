@@ -38,6 +38,26 @@ class PathLengthAnimation extends ElementAnimation {
   final double toOffset;
 }
 
+/// Keyframe-based stroke drawing animation.
+///
+/// This supports Framer Motion style `pathLength` and optional `pathOffset`
+/// keyframes.
+class PathLengthKeyframeAnimation extends ElementAnimation {
+  const PathLengthKeyframeAnimation({
+    required this.keyframes,
+    this.offsetKeyframes = const [],
+    required super.duration,
+    super.delay,
+    super.curve,
+  });
+
+  /// Path length keyframes (0.0 to 1.0).
+  final List<double> keyframes;
+
+  /// Optional path offset keyframes (0.0 to 1.0). Empty means always 0.
+  final List<double> offsetKeyframes;
+}
+
 /// Animates opacity from [from] to [to].
 class OpacityAnimation extends ElementAnimation {
   const OpacityAnimation({
@@ -50,6 +70,44 @@ class OpacityAnimation extends ElementAnimation {
 
   final double from;
   final double to;
+}
+
+/// Keyframe-based opacity animation.
+class OpacityKeyframeAnimation extends ElementAnimation {
+  const OpacityKeyframeAnimation({
+    required this.keyframes,
+    required super.duration,
+    super.delay,
+    super.curve,
+  });
+
+  final List<double> keyframes;
+}
+
+/// Animates stroke width from [from] to [to].
+class StrokeWidthAnimation extends ElementAnimation {
+  const StrokeWidthAnimation({
+    required this.from,
+    required this.to,
+    required super.duration,
+    super.delay,
+    super.curve,
+  });
+
+  final double from;
+  final double to;
+}
+
+/// Keyframe-based stroke width animation.
+class StrokeWidthKeyframeAnimation extends ElementAnimation {
+  const StrokeWidthKeyframeAnimation({
+    required this.keyframes,
+    required super.duration,
+    super.delay,
+    super.curve,
+  });
+
+  final List<double> keyframes;
 }
 
 /// Simple rotation animation from [fromDegrees] to [toDegrees].
@@ -94,6 +152,74 @@ class RotateKeyframeAnimation extends ElementAnimation {
   final double originY;
 }
 
+/// Rotation animation around the X axis (3D perspective).
+class RotateXAnimation extends ElementAnimation {
+  const RotateXAnimation({
+    required this.fromDegrees,
+    required this.toDegrees,
+    required super.duration,
+    super.delay,
+    super.curve,
+    this.originX = 0.5,
+    this.originY = 0.5,
+  });
+
+  final double fromDegrees;
+  final double toDegrees;
+  final double originX;
+  final double originY;
+}
+
+/// Keyframe-based rotation animation around the X axis.
+class RotateXKeyframeAnimation extends ElementAnimation {
+  const RotateXKeyframeAnimation({
+    required this.keyframes,
+    required super.duration,
+    super.delay,
+    super.curve,
+    this.originX = 0.5,
+    this.originY = 0.5,
+  });
+
+  final List<double> keyframes;
+  final double originX;
+  final double originY;
+}
+
+/// Rotation animation around the Y axis (3D perspective).
+class RotateYAnimation extends ElementAnimation {
+  const RotateYAnimation({
+    required this.fromDegrees,
+    required this.toDegrees,
+    required super.duration,
+    super.delay,
+    super.curve,
+    this.originX = 0.5,
+    this.originY = 0.5,
+  });
+
+  final double fromDegrees;
+  final double toDegrees;
+  final double originX;
+  final double originY;
+}
+
+/// Keyframe-based rotation animation around the Y axis.
+class RotateYKeyframeAnimation extends ElementAnimation {
+  const RotateYKeyframeAnimation({
+    required this.keyframes,
+    required super.duration,
+    super.delay,
+    super.curve,
+    this.originX = 0.5,
+    this.originY = 0.5,
+  });
+
+  final List<double> keyframes;
+  final double originX;
+  final double originY;
+}
+
 /// Simple scale animation from [from] to [to].
 class ScaleAnimation extends ElementAnimation {
   const ScaleAnimation({
@@ -102,10 +228,14 @@ class ScaleAnimation extends ElementAnimation {
     required super.duration,
     super.delay,
     super.curve,
+    this.originX = 0.5,
+    this.originY = 0.5,
   });
 
   final double from;
   final double to;
+  final double originX;
+  final double originY;
 }
 
 /// Keyframe-based scale animation for pulse effects.
@@ -117,10 +247,54 @@ class ScaleKeyframeAnimation extends ElementAnimation {
     required super.duration,
     super.delay,
     super.curve,
+    this.originX = 0.5,
+    this.originY = 0.5,
   });
 
   /// List of scale values at evenly spaced intervals.
   final List<double> keyframes;
+  final double originX;
+  final double originY;
+}
+
+/// Non-uniform scale animation on X and Y axes.
+class ScaleXYAnimation extends ElementAnimation {
+  const ScaleXYAnimation({
+    required this.fromX,
+    required this.toX,
+    required this.fromY,
+    required this.toY,
+    required super.duration,
+    super.delay,
+    super.curve,
+    this.originX = 0.5,
+    this.originY = 0.5,
+  });
+
+  final double fromX;
+  final double toX;
+  final double fromY;
+  final double toY;
+  final double originX;
+  final double originY;
+}
+
+/// Keyframe-based non-uniform scale animation.
+class ScaleXYKeyframeAnimation extends ElementAnimation {
+  const ScaleXYKeyframeAnimation({
+    required this.keyframesX,
+    required this.keyframesY,
+    required super.duration,
+    super.delay,
+    super.curve,
+    this.originX = 0.5,
+    this.originY = 0.5,
+  });
+
+  final List<double> keyframesX;
+  final List<double> keyframesY;
+  final double originX;
+  final double originY;
 }
 
 /// Simple translate animation.
@@ -158,6 +332,40 @@ class TranslateKeyframeAnimation extends ElementAnimation {
   final List<double> keyframesY;
 }
 
+/// Simple skew animation on the X axis.
+class SkewXAnimation extends ElementAnimation {
+  const SkewXAnimation({
+    required this.fromDegrees,
+    required this.toDegrees,
+    required super.duration,
+    super.delay,
+    super.curve,
+    this.originX = 0.5,
+    this.originY = 0.5,
+  });
+
+  final double fromDegrees;
+  final double toDegrees;
+  final double originX;
+  final double originY;
+}
+
+/// Keyframe-based skew animation on the X axis.
+class SkewXKeyframeAnimation extends ElementAnimation {
+  const SkewXKeyframeAnimation({
+    required this.keyframes,
+    required super.duration,
+    super.delay,
+    super.curve,
+    this.originX = 0.5,
+    this.originY = 0.5,
+  });
+
+  final List<double> keyframes;
+  final double originX;
+  final double originY;
+}
+
 /// Combines multiple animation types on a single element.
 class CombinedAnimation extends ElementAnimation {
   const CombinedAnimation({
@@ -165,21 +373,45 @@ class CombinedAnimation extends ElementAnimation {
     super.delay,
     super.curve,
     this.pathLength,
+    this.pathLengthKeyframe,
     this.opacity,
+    this.opacityKeyframe,
+    this.strokeWidth,
+    this.strokeWidthKeyframe,
     this.rotate,
     this.rotateKeyframe,
+    this.rotateX,
+    this.rotateXKeyframe,
+    this.rotateY,
+    this.rotateYKeyframe,
     this.scale,
     this.scaleKeyframe,
+    this.scaleXY,
+    this.scaleXYKeyframe,
     this.translate,
     this.translateKeyframe,
+    this.skewX,
+    this.skewXKeyframe,
   });
 
   final PathLengthAnimation? pathLength;
+  final PathLengthKeyframeAnimation? pathLengthKeyframe;
   final OpacityAnimation? opacity;
+  final OpacityKeyframeAnimation? opacityKeyframe;
+  final StrokeWidthAnimation? strokeWidth;
+  final StrokeWidthKeyframeAnimation? strokeWidthKeyframe;
   final RotateAnimation? rotate;
   final RotateKeyframeAnimation? rotateKeyframe;
+  final RotateXAnimation? rotateX;
+  final RotateXKeyframeAnimation? rotateXKeyframe;
+  final RotateYAnimation? rotateY;
+  final RotateYKeyframeAnimation? rotateYKeyframe;
   final ScaleAnimation? scale;
   final ScaleKeyframeAnimation? scaleKeyframe;
+  final ScaleXYAnimation? scaleXY;
+  final ScaleXYKeyframeAnimation? scaleXYKeyframe;
   final TranslateAnimation? translate;
   final TranslateKeyframeAnimation? translateKeyframe;
+  final SkewXAnimation? skewX;
+  final SkewXKeyframeAnimation? skewXKeyframe;
 }

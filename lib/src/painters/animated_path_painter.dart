@@ -30,12 +30,13 @@ class AnimatedPathPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (progress <= 0 && opacity <= 0) return;
 
-    final paint = Paint()
-      ..color = color.withValues(alpha: opacity)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth * scaleFactor
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    final paint =
+        Paint()
+          ..color = color.withValues(alpha: opacity)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth * scaleFactor
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
 
     final metrics = PathCache.getMetrics(pathData, scaleFactor);
 
@@ -93,12 +94,13 @@ class StaticPathPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (opacity <= 0) return;
 
-    final paint = Paint()
-      ..color = color.withValues(alpha: opacity)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth * scaleFactor
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    final paint =
+        Paint()
+          ..color = color.withValues(alpha: opacity)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth * scaleFactor
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
 
     for (final pathData in pathDataList) {
       final path = PathCache.getScaledPath(pathData, scaleFactor);
@@ -111,6 +113,42 @@ class StaticPathPainter extends CustomPainter {
     return oldDelegate.opacity != opacity ||
         oldDelegate.color != color ||
         oldDelegate.strokeWidth != strokeWidth;
+  }
+}
+
+/// Paints an SVG path with fill style.
+class FilledPathPainter extends CustomPainter {
+  FilledPathPainter({
+    required this.pathData,
+    required this.color,
+    required this.scaleFactor,
+    this.opacity = 1,
+  });
+
+  final String pathData;
+  final Color color;
+  final double scaleFactor;
+  final double opacity;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (opacity <= 0) return;
+
+    final paint =
+        Paint()
+          ..color = color.withValues(alpha: opacity)
+          ..style = PaintingStyle.fill;
+
+    final path = PathCache.getScaledPath(pathData, scaleFactor);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant FilledPathPainter oldDelegate) {
+    return oldDelegate.pathData != pathData ||
+        oldDelegate.opacity != opacity ||
+        oldDelegate.color != color ||
+        oldDelegate.scaleFactor != scaleFactor;
   }
 }
 
@@ -138,12 +176,13 @@ class CirclePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (opacity <= 0) return;
 
-    final paint = Paint()
-      ..color = color.withValues(alpha: opacity)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth * scaleFactor
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    final paint =
+        Paint()
+          ..color = color.withValues(alpha: opacity)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth * scaleFactor
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
 
     canvas.drawCircle(
       Offset(cx * scaleFactor, cy * scaleFactor),
@@ -184,12 +223,13 @@ class AnimatedCirclePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (progress <= 0 && opacity <= 0) return;
 
-    final paint = Paint()
-      ..color = color.withValues(alpha: opacity)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth * scaleFactor
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    final paint =
+        Paint()
+          ..color = color.withValues(alpha: opacity)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth * scaleFactor
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
 
     final sweepAngle = 2 * math.pi * progress.clamp(0, 1);
     final rect = Rect.fromCircle(

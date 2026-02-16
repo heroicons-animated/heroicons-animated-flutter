@@ -78,7 +78,7 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
     final iconAnim = widget.icon.animation;
     if (iconAnim != null) return iconAnim.duration;
     // Find the longest element animation duration + delay.
-    var maxDuration = const Duration(milliseconds: 500);
+    var maxDuration = Duration.zero;
     for (final element in widget.icon.elements) {
       final anim = element.animation;
       if (anim != null) {
@@ -86,7 +86,9 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
         if (total > maxDuration) maxDuration = total;
       }
     }
-    return maxDuration;
+    return maxDuration == Duration.zero
+        ? const Duration(milliseconds: 500)
+        : maxDuration;
   }
 
   double get _scaleFactor => widget.size / widget.icon.viewBoxWidth;
@@ -198,11 +200,12 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
       icon = RepaintBoundary(
         child: AnimatedBuilder(
           animation: _animationController,
-          builder: (context, child) => _applyIconAnimation(
-            child: child!,
-            animation: widget.icon.animation!,
-            t: _animationController.value,
-          ),
+          builder:
+              (context, child) => _applyIconAnimation(
+                child: child!,
+                animation: widget.icon.animation!,
+                t: _animationController.value,
+              ),
           child: icon,
         ),
       );
@@ -220,17 +223,11 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
       case AnimationTrigger.onHover:
         return MouseRegion(
           onEnter: (_) => _triggerAnimation(),
-          child: GestureDetector(
-            onTap: widget.onTap,
-            child: icon,
-          ),
+          child: GestureDetector(onTap: widget.onTap, child: icon),
         );
       case AnimationTrigger.loop:
       case AnimationTrigger.manual:
-        return GestureDetector(
-          onTap: widget.onTap,
-          child: icon,
-        );
+        return GestureDetector(onTap: widget.onTap, child: icon);
     }
   }
 
@@ -240,8 +237,7 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
       height: widget.size,
       child: Stack(
         children: [
-          for (final element in widget.icon.elements)
-            _buildElement(element),
+          for (final element in widget.icon.elements) _buildElement(element),
         ],
       ),
     );
@@ -265,23 +261,22 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
   Widget _buildPathElement(PathElement element) {
     final anim = element.animation;
     final t = _getAnimationValue(anim);
+    final strokeWidth = _getStrokeWidthValue(anim, t) ?? _effectiveStrokeWidth;
 
     Widget child;
 
-    if (_hasPathLengthAnimation(anim)) {
-      final plAnim = _getPathLengthAnimation(anim);
-      final progress = _lerpValue(plAnim!.from, plAnim.to, t);
-      final offset = _lerpValue(plAnim.fromOffset, plAnim.toOffset, t);
+    final pathLengthValues = _getPathLengthValues(anim, t);
+    if (pathLengthValues != null) {
       final opacity = _getOpacityValue(anim, t);
 
       child = CustomPaint(
         size: Size(widget.size, widget.size),
         painter: AnimatedPathPainter(
           pathData: element.d,
-          progress: progress,
-          pathOffset: offset,
+          progress: pathLengthValues.progress,
+          pathOffset: pathLengthValues.offset,
           color: widget.color,
-          strokeWidth: _effectiveStrokeWidth,
+          strokeWidth: strokeWidth,
           scaleFactor: _scaleFactor,
           opacity: opacity,
         ),
@@ -289,34 +284,42 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
     } else {
       final opacity = _getOpacityValue(anim, t);
 
-      child = CustomPaint(
-        size: Size(widget.size, widget.size),
-        painter: StaticPathPainter(
-          pathDataList: [element.d],
-          color: widget.color,
-          strokeWidth: _effectiveStrokeWidth,
-          scaleFactor: _scaleFactor,
-          opacity: opacity,
-        ),
-      );
+      if (element.fill ?? false) {
+        child = CustomPaint(
+          size: Size(widget.size, widget.size),
+          painter: FilledPathPainter(
+            pathData: element.d,
+            color: widget.color,
+            scaleFactor: _scaleFactor,
+            opacity: opacity,
+          ),
+        );
+      } else {
+        child = CustomPaint(
+          size: Size(widget.size, widget.size),
+          painter: StaticPathPainter(
+            pathDataList: [element.d],
+            color: widget.color,
+            strokeWidth: strokeWidth,
+            scaleFactor: _scaleFactor,
+            opacity: opacity,
+          ),
+        );
+      }
     }
 
-    return _applyElementTransforms(
-      child: child,
-      animation: anim,
-      t: t,
-    );
+    return _applyElementTransforms(child: child, animation: anim, t: t);
   }
 
   Widget _buildCircleElement(CircleElement element) {
     final anim = element.animation;
     final t = _getAnimationValue(anim);
+    final strokeWidth = _getStrokeWidthValue(anim, t) ?? _effectiveStrokeWidth;
 
     Widget child;
 
-    if (_hasPathLengthAnimation(anim)) {
-      final plAnim = _getPathLengthAnimation(anim);
-      final progress = _lerpValue(plAnim!.from, plAnim.to, t);
+    final pathLengthValues = _getPathLengthValues(anim, t);
+    if (pathLengthValues != null) {
       final opacity = _getOpacityValue(anim, t);
 
       child = CustomPaint(
@@ -325,9 +328,9 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
           cx: element.cx,
           cy: element.cy,
           r: element.r,
-          progress: progress,
+          progress: pathLengthValues.progress,
           color: widget.color,
-          strokeWidth: _effectiveStrokeWidth,
+          strokeWidth: strokeWidth,
           scaleFactor: _scaleFactor,
           opacity: opacity,
         ),
@@ -342,59 +345,56 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
           cy: element.cy,
           r: element.r,
           color: widget.color,
-          strokeWidth: _effectiveStrokeWidth,
+          strokeWidth: strokeWidth,
           scaleFactor: _scaleFactor,
           opacity: opacity,
         ),
       );
     }
 
-    return _applyElementTransforms(
-      child: child,
-      animation: anim,
-      t: t,
-    );
+    return _applyElementTransforms(child: child, animation: anim, t: t);
   }
 
   Widget _buildRectElement(RectElement element) {
     // Convert rect to a path for rendering.
     final rx = element.rx;
     final ry = element.ry;
-    final pathData = rx > 0 || ry > 0
-        ? 'M${element.x + rx},${element.y}'
-            'L${element.x + element.width - rx},${element.y}'
-            'Q${element.x + element.width},${element.y}'
-            ' ${element.x + element.width},${element.y + ry}'
-            'L${element.x + element.width},${element.y + element.height - ry}'
-            'Q${element.x + element.width},${element.y + element.height}'
-            ' ${element.x + element.width - rx},${element.y + element.height}'
-            'L${element.x + rx},${element.y + element.height}'
-            'Q${element.x},${element.y + element.height}'
-            ' ${element.x},${element.y + element.height - ry}'
-            'L${element.x},${element.y + ry}'
-            'Q${element.x},${element.y}'
-            ' ${element.x + rx},${element.y}Z'
-        : 'M${element.x},${element.y}'
-            'L${element.x + element.width},${element.y}'
-            'L${element.x + element.width},${element.y + element.height}'
-            'L${element.x},${element.y + element.height}Z';
+    final pathData =
+        rx > 0 || ry > 0
+            ? 'M${element.x + rx},${element.y}'
+                'L${element.x + element.width - rx},${element.y}'
+                'Q${element.x + element.width},${element.y}'
+                ' ${element.x + element.width},${element.y + ry}'
+                'L${element.x + element.width},${element.y + element.height - ry}'
+                'Q${element.x + element.width},${element.y + element.height}'
+                ' ${element.x + element.width - rx},${element.y + element.height}'
+                'L${element.x + rx},${element.y + element.height}'
+                'Q${element.x},${element.y + element.height}'
+                ' ${element.x},${element.y + element.height - ry}'
+                'L${element.x},${element.y + ry}'
+                'Q${element.x},${element.y}'
+                ' ${element.x + rx},${element.y}Z'
+            : 'M${element.x},${element.y}'
+                'L${element.x + element.width},${element.y}'
+                'L${element.x + element.width},${element.y + element.height}'
+                'L${element.x},${element.y + element.height}Z';
 
     final anim = element.animation;
     final t = _getAnimationValue(anim);
     final opacity = _getOpacityValue(anim, t);
+    final strokeWidth = _getStrokeWidthValue(anim, t) ?? _effectiveStrokeWidth;
 
     Widget child;
-    if (_hasPathLengthAnimation(anim)) {
-      final plAnim = _getPathLengthAnimation(anim);
-      final progress = _lerpValue(plAnim!.from, plAnim.to, t);
-
+    final pathLengthValues = _getPathLengthValues(anim, t);
+    if (pathLengthValues != null) {
       child = CustomPaint(
         size: Size(widget.size, widget.size),
         painter: AnimatedPathPainter(
           pathData: pathData,
-          progress: progress,
+          progress: pathLengthValues.progress,
+          pathOffset: pathLengthValues.offset,
           color: widget.color,
-          strokeWidth: _effectiveStrokeWidth,
+          strokeWidth: strokeWidth,
           scaleFactor: _scaleFactor,
           opacity: opacity,
         ),
@@ -405,7 +405,7 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
         painter: StaticPathPainter(
           pathDataList: [pathData],
           color: widget.color,
-          strokeWidth: _effectiveStrokeWidth,
+          strokeWidth: strokeWidth,
           scaleFactor: _scaleFactor,
           opacity: opacity,
         ),
@@ -416,25 +416,26 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
   }
 
   Widget _buildLineElement(LineElement element) {
-    final pathData = 'M${element.x1},${element.y1}'
+    final pathData =
+        'M${element.x1},${element.y1}'
         'L${element.x2},${element.y2}';
 
     final anim = element.animation;
     final t = _getAnimationValue(anim);
     final opacity = _getOpacityValue(anim, t);
+    final strokeWidth = _getStrokeWidthValue(anim, t) ?? _effectiveStrokeWidth;
 
     Widget child;
-    if (_hasPathLengthAnimation(anim)) {
-      final plAnim = _getPathLengthAnimation(anim);
-      final progress = _lerpValue(plAnim!.from, plAnim.to, t);
-
+    final pathLengthValues = _getPathLengthValues(anim, t);
+    if (pathLengthValues != null) {
       child = CustomPaint(
         size: Size(widget.size, widget.size),
         painter: AnimatedPathPainter(
           pathData: pathData,
-          progress: progress,
+          progress: pathLengthValues.progress,
+          pathOffset: pathLengthValues.offset,
           color: widget.color,
-          strokeWidth: _effectiveStrokeWidth,
+          strokeWidth: strokeWidth,
           scaleFactor: _scaleFactor,
           opacity: opacity,
         ),
@@ -445,7 +446,7 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
         painter: StaticPathPainter(
           pathDataList: [pathData],
           color: widget.color,
-          strokeWidth: _effectiveStrokeWidth,
+          strokeWidth: strokeWidth,
           scaleFactor: _scaleFactor,
           opacity: opacity,
         ),
@@ -469,19 +470,19 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
     final anim = element.animation;
     final t = _getAnimationValue(anim);
     final opacity = _getOpacityValue(anim, t);
+    final strokeWidth = _getStrokeWidthValue(anim, t) ?? _effectiveStrokeWidth;
 
     Widget child;
-    if (_hasPathLengthAnimation(anim)) {
-      final plAnim = _getPathLengthAnimation(anim);
-      final progress = _lerpValue(plAnim!.from, plAnim.to, t);
-
+    final pathLengthValues = _getPathLengthValues(anim, t);
+    if (pathLengthValues != null) {
       child = CustomPaint(
         size: Size(widget.size, widget.size),
         painter: AnimatedPathPainter(
           pathData: pathData,
-          progress: progress,
+          progress: pathLengthValues.progress,
+          pathOffset: pathLengthValues.offset,
           color: widget.color,
-          strokeWidth: _effectiveStrokeWidth,
+          strokeWidth: strokeWidth,
           scaleFactor: _scaleFactor,
           opacity: opacity,
         ),
@@ -492,7 +493,7 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
         painter: StaticPathPainter(
           pathDataList: [pathData],
           color: widget.color,
-          strokeWidth: _effectiveStrokeWidth,
+          strokeWidth: strokeWidth,
           scaleFactor: _scaleFactor,
           opacity: opacity,
         ),
@@ -523,21 +524,64 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
     if (range <= 0) return rawT;
 
     final localT = ((rawT - elementStart) / range).clamp(0.0, 1.0);
-    return anim.curve.transform(localT.toDouble());
+    return localT;
   }
 
-  /// Checks if the animation includes pathLength.
-  bool _hasPathLengthAnimation(ElementAnimation? anim) {
-    if (anim == null) return false;
-    if (anim is PathLengthAnimation) return true;
-    if (anim is CombinedAnimation) return anim.pathLength != null;
-    return false;
-  }
-
-  /// Extracts the PathLengthAnimation from the animation.
-  PathLengthAnimation? _getPathLengthAnimation(ElementAnimation? anim) {
-    if (anim is PathLengthAnimation) return anim;
-    if (anim is CombinedAnimation) return anim.pathLength;
+  /// Resolves pathLength/pathOffset values at progress [t].
+  ({double progress, double offset})? _getPathLengthValues(
+    ElementAnimation? anim,
+    double t,
+  ) {
+    if (anim is PathLengthAnimation) {
+      final easedT = anim.curve.transform(t);
+      return (
+        progress: _lerpValue(anim.from, anim.to, easedT),
+        offset: _lerpValue(anim.fromOffset, anim.toOffset, easedT),
+      );
+    }
+    if (anim is PathLengthKeyframeAnimation) {
+      return (
+        progress:
+            anim.keyframes.isNotEmpty
+                ? _interpolateKeyframes(anim.keyframes, t, curve: anim.curve)
+                : 1,
+        offset:
+            anim.offsetKeyframes.isNotEmpty
+                ? _interpolateKeyframes(
+                  anim.offsetKeyframes,
+                  t,
+                  curve: anim.curve,
+                )
+                : 0,
+      );
+    }
+    if (anim is CombinedAnimation) {
+      if (anim.pathLength != null) {
+        final pl = anim.pathLength!;
+        final easedT = pl.curve.transform(t);
+        return (
+          progress: _lerpValue(pl.from, pl.to, easedT),
+          offset: _lerpValue(pl.fromOffset, pl.toOffset, easedT),
+        );
+      }
+      if (anim.pathLengthKeyframe != null) {
+        final pk = anim.pathLengthKeyframe!;
+        return (
+          progress:
+              pk.keyframes.isNotEmpty
+                  ? _interpolateKeyframes(pk.keyframes, t, curve: pk.curve)
+                  : 1,
+          offset:
+              pk.offsetKeyframes.isNotEmpty
+                  ? _interpolateKeyframes(
+                    pk.offsetKeyframes,
+                    t,
+                    curve: pk.curve,
+                  )
+                  : 0,
+        );
+      }
+    }
     return null;
   }
 
@@ -545,10 +589,18 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
   double _getOpacityValue(ElementAnimation? anim, double t) {
     if (anim == null) return 1;
     if (anim is OpacityAnimation) {
-      return _lerpValue(anim.from, anim.to, t);
+      return _lerpValue(anim.from, anim.to, anim.curve.transform(t));
+    }
+    if (anim is OpacityKeyframeAnimation) {
+      return _interpolateKeyframes(anim.keyframes, t, curve: anim.curve);
     }
     if (anim is CombinedAnimation && anim.opacity != null) {
-      return _lerpValue(anim.opacity!.from, anim.opacity!.to, t);
+      final op = anim.opacity!;
+      return _lerpValue(op.from, op.to, op.curve.transform(t));
+    }
+    if (anim is CombinedAnimation && anim.opacityKeyframe != null) {
+      final op = anim.opacityKeyframe!;
+      return _interpolateKeyframes(op.keyframes, t, curve: op.curve);
     }
     return 1;
   }
@@ -563,16 +615,53 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
 
     var result = child;
 
-    // Scale.
-    final scaleValue = _getScaleValue(animation, t);
-    if (scaleValue != null && scaleValue != 1.0) {
-      result = Transform.scale(
-        scale: scaleValue,
+    // Scale (uniform and non-uniform).
+    final scaleValues = _getScaleValues(animation, t);
+    if (scaleValues != null &&
+        (scaleValues.dx != 1.0 || scaleValues.dy != 1.0)) {
+      final originX = _getScaleOriginX(animation);
+      final originY = _getScaleOriginY(animation);
+      result = Transform(
+        alignment: Alignment(originX * 2 - 1, originY * 2 - 1),
+        transform:
+            Matrix4.identity()
+              ..scaleByDouble(scaleValues.dx, scaleValues.dy, 1.0, 1.0),
         child: result,
       );
     }
 
-    // Rotate.
+    // Skew X.
+    final skewXValue = _getSkewXValue(animation, t);
+    if (skewXValue != null && skewXValue != 0.0) {
+      final originX = _getSkewOriginX(animation);
+      final originY = _getSkewOriginY(animation);
+      result = Transform(
+        alignment: Alignment(originX * 2 - 1, originY * 2 - 1),
+        transform:
+            Matrix4.identity()
+              ..setEntry(0, 1, math.tan(skewXValue * math.pi / 180)),
+        child: result,
+      );
+    }
+
+    // 3D rotate X/Y.
+    final rotateXValue = _getRotateXValue(animation, t) ?? 0;
+    final rotateYValue = _getRotateYValue(animation, t) ?? 0;
+    if (rotateXValue != 0.0 || rotateYValue != 0.0) {
+      final originX = _getRotate3DOriginX(animation);
+      final originY = _getRotate3DOriginY(animation);
+      result = Transform(
+        alignment: Alignment(originX * 2 - 1, originY * 2 - 1),
+        transform:
+            Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..rotateX(rotateXValue * math.pi / 180)
+              ..rotateY(rotateYValue * math.pi / 180),
+        child: result,
+      );
+    }
+
+    // Rotate Z.
     final rotateValue = _getRotateValue(animation, t);
     if (rotateValue != null && rotateValue != 0.0) {
       final originX = _getRotateOriginX(animation);
@@ -605,27 +694,125 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
     required ElementAnimation animation,
     required double t,
   }) {
-    final curvedT = animation.curve.transform(t.clamp(0, 1));
     return _applyElementTransforms(
       child: child,
       animation: animation,
-      t: curvedT,
+      t: t.clamp(0, 1).toDouble(),
     );
   }
 
-  double? _getScaleValue(ElementAnimation anim, double t) {
+  Offset? _getScaleValues(ElementAnimation anim, double t) {
     if (anim is ScaleAnimation) {
-      return _lerpValue(anim.from, anim.to, t);
+      final value = _lerpValue(anim.from, anim.to, anim.curve.transform(t));
+      return Offset(value, value);
     }
     if (anim is ScaleKeyframeAnimation) {
-      return _interpolateKeyframes(anim.keyframes, t);
+      final value = _interpolateKeyframes(anim.keyframes, t, curve: anim.curve);
+      return Offset(value, value);
+    }
+    if (anim is ScaleXYAnimation) {
+      final easedT = anim.curve.transform(t);
+      return Offset(
+        _lerpValue(anim.fromX, anim.toX, easedT),
+        _lerpValue(anim.fromY, anim.toY, easedT),
+      );
+    }
+    if (anim is ScaleXYKeyframeAnimation) {
+      return Offset(
+        anim.keyframesX.isNotEmpty
+            ? _interpolateKeyframes(anim.keyframesX, t, curve: anim.curve)
+            : 1,
+        anim.keyframesY.isNotEmpty
+            ? _interpolateKeyframes(anim.keyframesY, t, curve: anim.curve)
+            : 1,
+      );
     }
     if (anim is CombinedAnimation) {
+      if (anim.scaleXY != null) {
+        final scale = anim.scaleXY!;
+        final easedT = scale.curve.transform(t);
+        return Offset(
+          _lerpValue(scale.fromX, scale.toX, easedT),
+          _lerpValue(scale.fromY, scale.toY, easedT),
+        );
+      }
+      if (anim.scaleXYKeyframe != null) {
+        final sk = anim.scaleXYKeyframe!;
+        return Offset(
+          sk.keyframesX.isNotEmpty
+              ? _interpolateKeyframes(sk.keyframesX, t, curve: sk.curve)
+              : 1,
+          sk.keyframesY.isNotEmpty
+              ? _interpolateKeyframes(sk.keyframesY, t, curve: sk.curve)
+              : 1,
+        );
+      }
       if (anim.scale != null) {
-        return _lerpValue(anim.scale!.from, anim.scale!.to, t);
+        final scale = anim.scale!;
+        final value = _lerpValue(
+          scale.from,
+          scale.to,
+          scale.curve.transform(t),
+        );
+        return Offset(value, value);
       }
       if (anim.scaleKeyframe != null) {
-        return _interpolateKeyframes(anim.scaleKeyframe!.keyframes, t);
+        final scale = anim.scaleKeyframe!;
+        final value = _interpolateKeyframes(
+          scale.keyframes,
+          t,
+          curve: scale.curve,
+        );
+        return Offset(value, value);
+      }
+    }
+    return null;
+  }
+
+  double _getScaleOriginX(ElementAnimation anim) {
+    if (anim is ScaleAnimation) return anim.originX;
+    if (anim is ScaleKeyframeAnimation) return anim.originX;
+    if (anim is ScaleXYAnimation) return anim.originX;
+    if (anim is ScaleXYKeyframeAnimation) return anim.originX;
+    if (anim is CombinedAnimation) {
+      if (anim.scaleXY != null) return anim.scaleXY!.originX;
+      if (anim.scaleXYKeyframe != null) return anim.scaleXYKeyframe!.originX;
+      if (anim.scale != null) return anim.scale!.originX;
+      if (anim.scaleKeyframe != null) return anim.scaleKeyframe!.originX;
+    }
+    return 0.5;
+  }
+
+  double _getScaleOriginY(ElementAnimation anim) {
+    if (anim is ScaleAnimation) return anim.originY;
+    if (anim is ScaleKeyframeAnimation) return anim.originY;
+    if (anim is ScaleXYAnimation) return anim.originY;
+    if (anim is ScaleXYKeyframeAnimation) return anim.originY;
+    if (anim is CombinedAnimation) {
+      if (anim.scaleXY != null) return anim.scaleXY!.originY;
+      if (anim.scaleXYKeyframe != null) return anim.scaleXYKeyframe!.originY;
+      if (anim.scale != null) return anim.scale!.originY;
+      if (anim.scaleKeyframe != null) return anim.scaleKeyframe!.originY;
+    }
+    return 0.5;
+  }
+
+  double? _getStrokeWidthValue(ElementAnimation? anim, double t) {
+    if (anim == null) return null;
+    if (anim is StrokeWidthAnimation) {
+      return _lerpValue(anim.from, anim.to, anim.curve.transform(t));
+    }
+    if (anim is StrokeWidthKeyframeAnimation) {
+      return _interpolateKeyframes(anim.keyframes, t, curve: anim.curve);
+    }
+    if (anim is CombinedAnimation) {
+      if (anim.strokeWidth != null) {
+        final sw = anim.strokeWidth!;
+        return _lerpValue(sw.from, sw.to, sw.curve.transform(t));
+      }
+      if (anim.strokeWidthKeyframe != null) {
+        final sw = anim.strokeWidthKeyframe!;
+        return _interpolateKeyframes(sw.keyframes, t, curve: sw.curve);
       }
     }
     return null;
@@ -633,21 +820,83 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
 
   double? _getRotateValue(ElementAnimation anim, double t) {
     if (anim is RotateAnimation) {
-      return _lerpValue(anim.fromDegrees, anim.toDegrees, t);
+      return _lerpValue(
+        anim.fromDegrees,
+        anim.toDegrees,
+        anim.curve.transform(t),
+      );
     }
     if (anim is RotateKeyframeAnimation) {
-      return _interpolateKeyframes(anim.keyframes, t);
+      return _interpolateKeyframes(anim.keyframes, t, curve: anim.curve);
     }
     if (anim is CombinedAnimation) {
       if (anim.rotate != null) {
+        final rotate = anim.rotate!;
         return _lerpValue(
-          anim.rotate!.fromDegrees,
-          anim.rotate!.toDegrees,
-          t,
+          rotate.fromDegrees,
+          rotate.toDegrees,
+          rotate.curve.transform(t),
         );
       }
       if (anim.rotateKeyframe != null) {
-        return _interpolateKeyframes(anim.rotateKeyframe!.keyframes, t);
+        final rotate = anim.rotateKeyframe!;
+        return _interpolateKeyframes(rotate.keyframes, t, curve: rotate.curve);
+      }
+    }
+    return null;
+  }
+
+  double? _getRotateXValue(ElementAnimation anim, double t) {
+    if (anim is RotateXAnimation) {
+      return _lerpValue(
+        anim.fromDegrees,
+        anim.toDegrees,
+        anim.curve.transform(t),
+      );
+    }
+    if (anim is RotateXKeyframeAnimation) {
+      return _interpolateKeyframes(anim.keyframes, t, curve: anim.curve);
+    }
+    if (anim is CombinedAnimation) {
+      if (anim.rotateX != null) {
+        final rotate = anim.rotateX!;
+        return _lerpValue(
+          rotate.fromDegrees,
+          rotate.toDegrees,
+          rotate.curve.transform(t),
+        );
+      }
+      if (anim.rotateXKeyframe != null) {
+        final rotate = anim.rotateXKeyframe!;
+        return _interpolateKeyframes(rotate.keyframes, t, curve: rotate.curve);
+      }
+    }
+    return null;
+  }
+
+  double? _getRotateYValue(ElementAnimation anim, double t) {
+    if (anim is RotateYAnimation) {
+      return _lerpValue(
+        anim.fromDegrees,
+        anim.toDegrees,
+        anim.curve.transform(t),
+      );
+    }
+    if (anim is RotateYKeyframeAnimation) {
+      return _interpolateKeyframes(anim.keyframes, t, curve: anim.curve);
+    }
+    if (anim is CombinedAnimation) {
+      if (anim.rotateY != null) {
+        final rotate = anim.rotateY!;
+        return _lerpValue(
+          rotate.fromDegrees,
+          rotate.toDegrees,
+          rotate.curve.transform(t),
+        );
+      }
+      if (anim.rotateYKeyframe != null) {
+        final rotate = anim.rotateYKeyframe!;
+        return _interpolateKeyframes(rotate.keyframes, t, curve: rotate.curve);
       }
     }
     return null;
@@ -673,38 +922,69 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
     return 0.5;
   }
 
+  double _getRotate3DOriginX(ElementAnimation anim) {
+    if (anim is RotateXAnimation) return anim.originX;
+    if (anim is RotateXKeyframeAnimation) return anim.originX;
+    if (anim is RotateYAnimation) return anim.originX;
+    if (anim is RotateYKeyframeAnimation) return anim.originX;
+    if (anim is CombinedAnimation) {
+      if (anim.rotateX != null) return anim.rotateX!.originX;
+      if (anim.rotateXKeyframe != null) return anim.rotateXKeyframe!.originX;
+      if (anim.rotateY != null) return anim.rotateY!.originX;
+      if (anim.rotateYKeyframe != null) return anim.rotateYKeyframe!.originX;
+    }
+    return 0.5;
+  }
+
+  double _getRotate3DOriginY(ElementAnimation anim) {
+    if (anim is RotateXAnimation) return anim.originY;
+    if (anim is RotateXKeyframeAnimation) return anim.originY;
+    if (anim is RotateYAnimation) return anim.originY;
+    if (anim is RotateYKeyframeAnimation) return anim.originY;
+    if (anim is CombinedAnimation) {
+      if (anim.rotateX != null) return anim.rotateX!.originY;
+      if (anim.rotateXKeyframe != null) return anim.rotateXKeyframe!.originY;
+      if (anim.rotateY != null) return anim.rotateY!.originY;
+      if (anim.rotateYKeyframe != null) return anim.rotateYKeyframe!.originY;
+    }
+    return 0.5;
+  }
+
   Offset? _getTranslateValue(ElementAnimation anim, double t) {
     if (anim is TranslateAnimation) {
+      final easedT = anim.curve.transform(t);
       return Offset(
-        _lerpValue(anim.fromX, anim.toX, t),
-        _lerpValue(anim.fromY, anim.toY, t),
+        _lerpValue(anim.fromX, anim.toX, easedT),
+        _lerpValue(anim.fromY, anim.toY, easedT),
       );
     }
     if (anim is TranslateKeyframeAnimation) {
       return Offset(
         anim.keyframesX.isNotEmpty
-            ? _interpolateKeyframes(anim.keyframesX, t)
+            ? _interpolateKeyframes(anim.keyframesX, t, curve: anim.curve)
             : 0,
         anim.keyframesY.isNotEmpty
-            ? _interpolateKeyframes(anim.keyframesY, t)
+            ? _interpolateKeyframes(anim.keyframesY, t, curve: anim.curve)
             : 0,
       );
     }
     if (anim is CombinedAnimation) {
       if (anim.translate != null) {
+        final translate = anim.translate!;
+        final easedT = translate.curve.transform(t);
         return Offset(
-          _lerpValue(anim.translate!.fromX, anim.translate!.toX, t),
-          _lerpValue(anim.translate!.fromY, anim.translate!.toY, t),
+          _lerpValue(translate.fromX, translate.toX, easedT),
+          _lerpValue(translate.fromY, translate.toY, easedT),
         );
       }
       if (anim.translateKeyframe != null) {
         final tk = anim.translateKeyframe!;
         return Offset(
           tk.keyframesX.isNotEmpty
-              ? _interpolateKeyframes(tk.keyframesX, t)
+              ? _interpolateKeyframes(tk.keyframesX, t, curve: tk.curve)
               : 0,
           tk.keyframesY.isNotEmpty
-              ? _interpolateKeyframes(tk.keyframesY, t)
+              ? _interpolateKeyframes(tk.keyframesY, t, curve: tk.curve)
               : 0,
         );
       }
@@ -712,19 +992,75 @@ class _HeroiconAnimatedIconState extends State<HeroiconAnimatedIcon>
     return null;
   }
 
+  double? _getSkewXValue(ElementAnimation anim, double t) {
+    if (anim is SkewXAnimation) {
+      return _lerpValue(
+        anim.fromDegrees,
+        anim.toDegrees,
+        anim.curve.transform(t),
+      );
+    }
+    if (anim is SkewXKeyframeAnimation) {
+      return _interpolateKeyframes(anim.keyframes, t, curve: anim.curve);
+    }
+    if (anim is CombinedAnimation) {
+      if (anim.skewX != null) {
+        final skew = anim.skewX!;
+        return _lerpValue(
+          skew.fromDegrees,
+          skew.toDegrees,
+          skew.curve.transform(t),
+        );
+      }
+      if (anim.skewXKeyframe != null) {
+        final skew = anim.skewXKeyframe!;
+        return _interpolateKeyframes(skew.keyframes, t, curve: skew.curve);
+      }
+    }
+    return null;
+  }
+
+  double _getSkewOriginX(ElementAnimation anim) {
+    if (anim is SkewXAnimation) return anim.originX;
+    if (anim is SkewXKeyframeAnimation) return anim.originX;
+    if (anim is CombinedAnimation) {
+      if (anim.skewX != null) return anim.skewX!.originX;
+      if (anim.skewXKeyframe != null) return anim.skewXKeyframe!.originX;
+    }
+    return 0.5;
+  }
+
+  double _getSkewOriginY(ElementAnimation anim) {
+    if (anim is SkewXAnimation) return anim.originY;
+    if (anim is SkewXKeyframeAnimation) return anim.originY;
+    if (anim is CombinedAnimation) {
+      if (anim.skewX != null) return anim.skewX!.originY;
+      if (anim.skewXKeyframe != null) return anim.skewXKeyframe!.originY;
+    }
+    return 0.5;
+  }
+
   /// Linearly interpolates between [a] and [b] at progress [t].
   double _lerpValue(double a, double b, double t) => a + (b - a) * t;
 
   /// Interpolates through a list of keyframe values at progress [t].
-  double _interpolateKeyframes(List<double> keyframes, double t) {
+  ///
+  /// The [curve] is applied per segment (Framer Motion style), not once across
+  /// the full keyframe sequence.
+  double _interpolateKeyframes(
+    List<double> keyframes,
+    double t, {
+    Curve curve = Curves.linear,
+  }) {
     if (keyframes.isEmpty) return 0;
     if (keyframes.length == 1) return keyframes[0];
 
     final segments = keyframes.length - 1;
     final segmentIndex = (t * segments).floor().clamp(0, segments - 1);
     final segmentT = (t * segments) - segmentIndex;
+    final easedSegmentT = curve.transform(segmentT.clamp(0.0, 1.0));
 
     return keyframes[segmentIndex] +
-        (keyframes[segmentIndex + 1] - keyframes[segmentIndex]) * segmentT;
+        (keyframes[segmentIndex + 1] - keyframes[segmentIndex]) * easedSegmentT;
   }
 }

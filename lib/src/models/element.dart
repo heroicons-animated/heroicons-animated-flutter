@@ -10,13 +10,13 @@ sealed class IconElement {
 
 /// An SVG `<path>` element.
 class PathElement extends IconElement {
-  const PathElement({
-    required this.d,
-    super.animation,
-  });
+  const PathElement({required this.d, this.fill = false, super.animation});
 
   /// The SVG path data string (the `d` attribute).
   final String d;
+
+  /// Whether this path should be filled instead of stroked.
+  final bool? fill;
 }
 
 /// An SVG `<circle>` element.
@@ -71,10 +71,7 @@ class LineElement extends IconElement {
 
 /// An SVG `<polyline>` element.
 class PolylineElement extends IconElement {
-  const PolylineElement({
-    required this.points,
-    super.animation,
-  });
+  const PolylineElement({required this.points, super.animation});
 
   /// Space-separated list of points (e.g. "0,0 10,10 20,0").
   final String points;
