@@ -29,13 +29,18 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
   static const double _buttonHeight = 30;
   static const double _installControlHeight = 42;
   static const String _heartSvg = '''
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M12 21s-7.5-4.35-9.5-8.53C.64 8.59 2.43 4.5 6.31 4.5c2.2 0 3.38 1.08 4.19 2.32.81-1.24 1.99-2.32 4.19-2.32 3.88 0 5.67 4.09 3.81 7.97C19.5 16.65 12 21 12 21Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
 </svg>
 ''';
   static const String _githubSvg = '''
 <svg viewBox="0 0 16 16" fill="currentColor">
   <path d="M8 0C3.58 0 0 3.65 0 8.15c0 3.6 2.29 6.66 5.47 7.74.4.08.55-.18.55-.4 0-.2-.01-.85-.01-1.54-2.01.38-2.53-.51-2.69-.98-.09-.24-.48-.98-.82-1.17-.28-.16-.68-.55-.01-.56.63-.01 1.08.59 1.23.83.72 1.24 1.87.89 2.33.68.07-.53.28-.89.5-1.09-1.78-.21-3.64-.92-3.64-4.08 0-.9.31-1.64.82-2.21-.08-.21-.36-1.05.08-2.18 0 0 .67-.22 2.2.84a7.35 7.35 0 0 1 2-.28c.68 0 1.37.1 2 .28 1.53-1.06 2.2-.84 2.2-.84.44 1.13.16 1.97.08 2.18.51.57.82 1.31.82 2.21 0 3.17-1.87 3.87-3.65 4.08.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .22.15.48.55.4A8.2 8.2 0 0 0 16 8.15C16 3.65 12.42 0 8 0Z"/>
+</svg>
+''';
+  static const String _starSvg = '''
+<svg aria-hidden="true" fill="none" height="13" viewBox="0 0 13 13" width="13" xmlns="http://www.w3.org/2000/svg">
+  <path clip-rule="evenodd" d="M6.45803 2.89654e-06C6.6061 0.000101587 6.75082 0.0440267 6.87397 0.126243C6.99712 0.208458 7.09317 0.325286 7.15003 0.462003L8.56003 3.855L12.224 4.148C12.3717 4.15988 12.5125 4.2152 12.6287 4.30699C12.7449 4.39878 12.8314 4.52293 12.8772 4.66379C12.923 4.80464 12.926 4.9559 12.8859 5.09849C12.8459 5.24108 12.7645 5.36861 12.652 5.465L9.86103 7.855L10.714 11.43C10.7483 11.574 10.7392 11.725 10.6878 11.8638C10.6364 12.0027 10.5451 12.1233 10.4253 12.2103C10.3056 12.2973 10.1627 12.347 10.0148 12.353C9.86685 12.359 9.72045 12.3211 9.59403 12.244L6.45603 10.33L3.32103 12.245C3.19461 12.3221 3.04821 12.36 2.90027 12.354C2.75234 12.348 2.60949 12.2983 2.48972 12.2113C2.36996 12.1243 2.27864 12.0037 2.22726 11.8649C2.17589 11.726 2.16676 11.575 2.20103 11.431L3.05303 7.857L0.263028 5.467C0.150277 5.37074 0.0685828 5.24323 0.028266 5.10056C-0.0120509 4.9579 -0.00918217 4.80648 0.0365099 4.66545C0.082202 4.52441 0.168667 4.40008 0.284984 4.30816C0.401301 4.21624 0.54225 4.16086 0.690028 4.149L4.35303 3.856L5.76303 0.463003C5.81993 0.325626 5.91638 0.208264 6.04013 0.125824C6.16387 0.0433847 6.30933 -0.000410263 6.45803 2.89654e-06Z" fill="currentColor" fill-rule="evenodd"/>
 </svg>
 ''';
   static const String _dartSvg = '''
@@ -214,26 +219,27 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
 
   Widget _buildDescriptionSection(bool isDark) {
     final isMobile = _isMobileLayout(context);
-    final linkButtons = [
-      _buildTextLinkContainer(
-        AppStrings.flutterLabel,
-        AppStrings.flutterUrl,
-        isDark: isDark,
-        margin: EdgeInsets.zero,
-      ),
-      _buildTextLinkContainer(
-        AppStrings.heroiconsLabel,
-        AppStrings.heroiconsUrl,
-        isDark: isDark,
-        margin: EdgeInsets.zero,
-      ),
-      _buildTextLinkContainer(
-        AppStrings.lucideInspiredLabel,
-        AppStrings.lucideAnimatedUrl,
-        isDark: isDark,
-        margin: EdgeInsets.zero,
-      ),
-    ];
+    final flutterButton = _buildTextLinkContainer(
+      AppStrings.flutterLabel,
+      AppStrings.flutterUrl,
+      isDark: isDark,
+      margin: EdgeInsets.zero,
+      fullWidth: isMobile,
+    );
+    final heroiconsButton = _buildTextLinkContainer(
+      AppStrings.heroiconsLabel,
+      AppStrings.heroiconsUrl,
+      isDark: isDark,
+      margin: EdgeInsets.zero,
+      fullWidth: isMobile,
+    );
+    final lucideButton = _buildTextLinkContainer(
+      AppStrings.lucideLabel,
+      AppStrings.lucideAnimatedUrl,
+      isDark: isDark,
+      margin: EdgeInsets.zero,
+      fullWidth: isMobile,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,11 +251,15 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
         if (isMobile) ...[
           _buildDescriptionText(AppStrings.madeWith, isDark),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: linkButtons,
-          ),
+          flutterButton,
+          const SizedBox(height: 6),
+          _buildDescriptionText(AppStrings.andWord, isDark),
+          const SizedBox(height: 6),
+          heroiconsButton,
+          const SizedBox(height: 6),
+          _buildDescriptionText(AppStrings.inspiredFrom, isDark),
+          const SizedBox(height: 6),
+          lucideButton,
         ] else
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -257,7 +267,15 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
               children: [
                 _buildDescriptionText(AppStrings.madeWith, isDark),
                 const SizedBox(width: 8),
-                ..._withHorizontalSpacing(linkButtons),
+                flutterButton,
+                const SizedBox(width: 8),
+                _buildDescriptionText(AppStrings.andWord, isDark),
+                const SizedBox(width: 8),
+                heroiconsButton,
+                const SizedBox(width: 8),
+                _buildDescriptionText(AppStrings.inspiredFrom, isDark),
+                const SizedBox(width: 8),
+                lucideButton,
               ],
             ),
           ),
@@ -288,14 +306,15 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
       );
     }
 
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        _buildInstallCommandContainer(isDark: isDark, fullWidth: false),
-        _buildPubDevButton(isDark: isDark, fullWidth: false),
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _buildInstallCommandContainer(isDark: isDark, fullWidth: false),
+          const SizedBox(width: 8),
+          _buildPubDevButton(isDark: isDark, fullWidth: false),
+        ],
+      ),
     );
   }
 
@@ -403,20 +422,6 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
     );
   }
 
-  List<Widget> _withHorizontalSpacing(
-    List<Widget> items, {
-    double spacing = 8,
-  }) {
-    final spacedItems = <Widget>[];
-    for (final item in items) {
-      if (spacedItems.isNotEmpty) {
-        spacedItems.add(SizedBox(width: spacing));
-      }
-      spacedItems.add(item);
-    }
-    return spacedItems;
-  }
-
   Widget _buildInstallCommandContainer({
     required bool isDark,
     required bool fullWidth,
@@ -426,11 +431,9 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
       color: isDark ? Colors.white70 : Colors.black54,
     );
 
-    final commandContent = Container(
-      constraints: BoxConstraints(
-        minHeight: _installControlHeight,
-        maxWidth: fullWidth ? double.infinity : 460,
-      ),
+    return Container(
+      width: fullWidth ? double.infinity : 380,
+      constraints: const BoxConstraints(minHeight: _installControlHeight),
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: isDark ? Colors.black : Colors.white,
@@ -440,7 +443,6 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
         ),
       ),
       child: Row(
-        mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
         children: [
           InkWell(
             onTap: () => _copyToClipboard(AppStrings.installCommand),
@@ -451,28 +453,17 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
             ),
           ),
           const SizedBox(width: 10),
-          if (fullWidth)
-            Expanded(
-              child: Text(
-                AppStrings.installCommand,
-                overflow: TextOverflow.ellipsis,
-                softWrap: false,
-                style: textStyle,
-              ),
-            )
-          else
-            Text(
+          Expanded(
+            child: Text(
               AppStrings.installCommand,
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
               style: textStyle,
             ),
+          ),
         ],
       ),
     );
-
-    if (fullWidth) {
-      return commandContent;
-    }
-    return IntrinsicWidth(child: commandContent);
   }
 
   Widget _buildPubDevButton({
@@ -541,7 +532,6 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
     required bool isDark,
     required bool iconOnly,
   }) {
-    final textColor = isDark ? Colors.white : Colors.black;
     final mutedColor = isDark ? Colors.white70 : Colors.black54;
     return _buildLinkContainer(
       url: AppStrings.githubUrl,
@@ -555,62 +545,24 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
             FutureBuilder<int>(
               future: _githubStarsFuture,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        AppStrings.githubLabel,
-                        style: TextStyle(fontSize: 14, color: textColor),
-                      ),
-                      const SizedBox(width: 6),
-                      SizedBox(
-                        width: 12,
-                        height: 12,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 1.6,
-                          color: mutedColor,
-                        ),
-                      ),
-                    ],
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        AppStrings.githubLabel,
-                        style: TextStyle(fontSize: 14, color: textColor),
-                      ),
-                      const SizedBox(width: 6),
-                      Icon(
-                        Icons.error_outline,
-                        size: 14,
-                        color: mutedColor,
-                      ),
-                    ],
-                  );
-                }
-
+                final starsText = switch (snapshot.connectionState) {
+                  ConnectionState.waiting => '...',
+                  _ when snapshot.hasError => 'err',
+                  _ => _formatStars(snapshot.data ?? 0),
+                };
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      AppStrings.githubLabel,
-                      style: TextStyle(fontSize: 14, color: textColor),
-                    ),
-                    const SizedBox(width: 6),
-                    Icon(
-                      Icons.star,
-                      size: 14,
-                      color: mutedColor,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      _formatStars(snapshot.data ?? 0),
+                      starsText,
                       style: TextStyle(fontSize: 13, color: mutedColor),
+                    ),
+                    const SizedBox(width: 4),
+                    _buildSvgIcon(
+                      _starSvg,
+                      isDark: isDark,
+                      size: 13,
+                      color: mutedColor,
                     ),
                   ],
                 );
@@ -627,6 +579,7 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
     required bool isDark,
     required double size,
     bool preserveColor = false,
+    Color? color,
   }) {
     return SvgPicture.string(
       svg,
@@ -636,7 +589,7 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
           preserveColor
               ? null
               : ColorFilter.mode(
-                isDark ? Colors.white : Colors.black,
+                color ?? (isDark ? Colors.white : Colors.black),
                 BlendMode.srcIn,
               ),
     );
@@ -675,11 +628,13 @@ class _AnimatedIconsDemoState extends State<AnimatedIconsDemo> {
     String url, {
     required bool isDark,
     EdgeInsetsGeometry margin = const EdgeInsets.symmetric(horizontal: 4),
+    bool fullWidth = false,
   }) {
     return _buildLinkContainer(
       url: url,
       isDark: isDark,
       margin: margin,
+      fullWidth: fullWidth,
       child: Text(
         text,
         maxLines: 1,

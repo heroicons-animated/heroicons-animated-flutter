@@ -23,11 +23,13 @@ class AppStrings {
   static const description2 = 'ported from heroicons-animated react';
 
   static const madeWith = 'made with';
+  static const andWord = 'and';
+  static const inspiredFrom = 'inspired from';
   static const flutterLabel = 'flutter';
   static const flutterUrl = 'https://flutter.dev';
   static const heroiconsLabel = 'heroicons';
   static const heroiconsUrl = 'https://heroicons.com';
-  static const lucideInspiredLabel = 'lucide-animated';
+  static const lucideLabel = 'lucide-animated';
   static const lucideAnimatedUrl = 'https://lucide-animated.com/';
 
   static const installCommand = 'flutter pub add heroicons_animated';
