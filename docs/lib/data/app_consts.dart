@@ -1,5 +1,6 @@
 class AppStrings {
   static const appBarTitle = 'heroicons-animated';
+  static const mobileBreakpoint = 760.0;
 
   static const pubDevLabel = 'pub.dev';
   static const pubDevUrl = 'https://pub.dev/packages/heroicons_animated';
@@ -7,9 +8,10 @@ class AppStrings {
   static const githubLabel = 'github';
   static const githubUrl =
       'https://github.com/heroicons-animated/heroicons-animated-flutter';
+  static const githubApiUrl =
+      'https://api.github.com/repos/heroicons-animated/heroicons-animated-flutter';
   static const sponsorLabel = 'sponsor';
-  static const sponsorUrl =
-      'https://github.com/sponsors/Aniket-508';
+  static const sponsorUrl = 'https://github.com/sponsors/Aniket-508';
   static const githubIconsBaseUrl =
       'https://github.com/heroicons-animated/heroicons-animated-flutter/blob/main/lib/src/icons/all_icons.dart';
 
@@ -23,9 +25,10 @@ class AppStrings {
   static const madeWith = 'made with';
   static const flutterLabel = 'flutter';
   static const flutterUrl = 'https://flutter.dev';
-  static const and = 'and';
   static const heroiconsLabel = 'heroicons';
   static const heroiconsUrl = 'https://heroicons.com';
+  static const lucideInspiredLabel = 'lucide-animated';
+  static const lucideAnimatedUrl = 'https://lucide-animated.com/';
 
   static const installCommand = 'flutter pub add heroicons_animated';
   static const copiedToClipboardPrefix = 'copied to clipboard: ';
